@@ -2,7 +2,7 @@ name: Films API Tests
 
 on:
   pull_request:
-#    branches: [ main ]
+#    branches: [ user-and-filmcreator ]
 
 jobs:
   build:
