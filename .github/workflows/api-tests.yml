@@ -32,8 +32,7 @@ jobs:
           chmod a+x /tmp/wait-for-it.sh
 
       - name: Run Application
-        run: nohup mvn spring-boot:run &
-      - run: /tmp/wait-for-it.sh -t 120 localhost:8080 -- echo "application is up"
+        run: mvn spring-boot:run
 
       - name: Test API POSTMAN
         run: |
