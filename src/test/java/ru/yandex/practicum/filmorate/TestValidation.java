@@ -34,33 +34,21 @@ public class TestValidation {
     @Test
     void shouldReturnExceptionIfLoginIsEmptyOrNull () {
         user.setLogin("");
-        try {
             userController.addUser(user);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
         Assertions.assertTrue(userController.getUsers().isEmpty());
     }
 
     @Test
     void shouldReturnExceptionIfNameContainsWhitespace() {
         user.setName("Den   i s");
-        try {
-            userController.addUser(user);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
+        userController.addUser(user);
         Assertions.assertFalse(userController.getUsers().isEmpty());
     }
 
     @Test
     void shouldReturnExceptionIfNicknameIsEmpty(){
         user.setName("");
-        try {
-            userController.addUser(user);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
+        userController.addUser(user);
         Assertions.assertEquals("Bas",user.getLogin());
         Assertions.assertEquals(1,userController.getUsers().size());
     }
@@ -68,59 +56,39 @@ public class TestValidation {
     @Test
     void shouldReturnExceptionIfMailNotContainAt () {
         user.setEmail("denis.ru");
-        try {
             userController.addUser(user);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
         Assertions.assertTrue(userController.getUsers().isEmpty());
     }
 
     @Test
     void shouldReturnExceptionIfMailIsEmpty () {
         user.setEmail("");
-        try {
             userController.addUser(user);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
         Assertions.assertTrue(userController.getUsers().isEmpty());
     }
 
     @Test
     void shouldReturnExceptionIfDateOfBornIsNow () {
         user.setBirthday("2022-04-20");
-        try {
             userController.addUser(user);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
         Assertions.assertEquals("2022-04-20",user.getBirthday());
     }
 
     @Test
     void shouldReturnExceptionIfDateOfBornAfterNow () {
         user.setBirthday(LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        try {
             userController.addUser(user);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
         Assertions.assertTrue(userController.getUsers().isEmpty());
     }
 
     @Test
     void shouldCreateUser() {
-        try {
             userController.addUser(user);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
         Assertions.assertEquals(userController.getUsers().get(user.getIdU()),user);
     }
 
     @Test
-    void shouldUpdateUser() throws ValidationException{
+    void shouldUpdateUser() {
         userController.addUser(user);
         user.setLogin("Boo");
         userController.updateUser(user);
@@ -130,77 +98,49 @@ public class TestValidation {
     @Test
     void shouldReturnExceptionIfFilmNameIsEmpty()  {
         film.setName("");
-        try {
             filmController.addFilm(film);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
         Assertions.assertTrue(filmController.getFilms().isEmpty());
     }
 
     @Test
     void shouldReturnExceptionIfDescriptionLenghtIs200() {
         film.setDescription(RandomString.make(200));
-        try {
             filmController.addFilm(film);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
         Assertions.assertFalse(filmController.getFilms().isEmpty());
     }
 
     @Test
     void shouldReturnExceptionIfDescriptionLengthIs201() {
         film.setDescription(RandomString.make(201));
-        try {
             filmController.addFilm(film);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
         Assertions.assertTrue(filmController.getFilms().isEmpty());
     }
 
     @Test
     void shouldReturnExceptionIfDateIs28121895()  {
         film.setReleaseDate("1895-12-28");
-        try {
-            filmController.addFilm(film);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
+        filmController.addFilm(film);
         Assertions.assertFalse(filmController.getFilms().isEmpty());
     }
 
     @Test
     void shouldReturnExceptionIfDateIsBefore27121895()  {
         film.setReleaseDate("1895-12-27");
-        try {
             filmController.addFilm(film);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
         Assertions.assertTrue(filmController.getFilms().isEmpty());
     }
 
     @Test
     void shouldReturnExceptionIfDurationISZero()  {
         film.setDuration(0);
-        try {
-            filmController.addFilm(film);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
+        filmController.addFilm(film);
         Assertions.assertTrue(filmController.getFilms().isEmpty());
     }
 
     @Test
     void shouldReturnExceptionIfDurationIsMinus1()  {
         film.setDuration(-1);
-        try {
             filmController.addFilm(film);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        }
         Assertions.assertTrue(filmController.getFilms().isEmpty());
     }
 }
