@@ -23,19 +23,22 @@ public class TestValidation {
             .duration(90)
             .build();
 
-   User user = User.builder()
-           .birthday("1991-08-13")
-           .login("Bas")
-           .name("Denis")
-           .email("denja25@yandex.ru")
-           .build();
+    User user = User.builder()
+            .birthday("1991-08-13")
+            .login("Bas")
+            .name("Denis")
+            .email("denja25@yandex.ru")
+            .build();
 
-   // тестирую функционал по добавлению данных на граничных условия, тк структура методов по обновлению данных идентична
+    // тестирую функционал по добавлению данных на граничных условия, тк структура методов по обновлению данных идентична
     @Test
-    void shouldReturnExceptionIfLoginIsEmptyOrNull () {
-        user.setLogin("");
+    void shouldReturnExceptionIfLoginIsEmptyOrNull() {
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
+            user.setLogin("");
             userController.addUser(user);
-        Assertions.assertTrue(userController.getUsers().isEmpty());
+        });
+
+        Assertions.assertEquals("Ошибка данных запроса", thrown.getMessage());
     }
 
     @Test
@@ -46,45 +49,52 @@ public class TestValidation {
     }
 
     @Test
-    void shouldReturnExceptionIfNicknameIsEmpty(){
+    void shouldReturnExceptionIfNicknameIsEmpty() {
         user.setName("");
         userController.addUser(user);
-        Assertions.assertEquals("Bas",user.getLogin());
-        Assertions.assertEquals(1,userController.getUsers().size());
+        Assertions.assertEquals("Bas", user.getLogin());
+        Assertions.assertEquals(1, userController.getUsers().size());
     }
 
     @Test
-    void shouldReturnExceptionIfMailNotContainAt () {
-        user.setEmail("denis.ru");
+    void shouldReturnExceptionIfMailNotContainAt() {
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
+            user.setEmail("denis.ru");
             userController.addUser(user);
-        Assertions.assertTrue(userController.getUsers().isEmpty());
+        });
+        Assertions.assertEquals("Ошибка данных запроса", thrown.getMessage());
     }
 
     @Test
-    void shouldReturnExceptionIfMailIsEmpty () {
-        user.setEmail("");
+    void shouldReturnExceptionIfMailIsEmpty() {
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
+            user.setEmail("");
             userController.addUser(user);
-        Assertions.assertTrue(userController.getUsers().isEmpty());
+        });
+        Assertions.assertEquals("Ошибка данных запроса", thrown.getMessage());
+
     }
 
     @Test
-    void shouldReturnExceptionIfDateOfBornIsNow () {
+    void shouldReturnExceptionIfDateOfBornIsNow() {
         user.setBirthday("2022-04-20");
-            userController.addUser(user);
-        Assertions.assertEquals("2022-04-20",user.getBirthday());
+        userController.addUser(user);
+        Assertions.assertEquals("2022-04-20", user.getBirthday());
     }
 
     @Test
-    void shouldReturnExceptionIfDateOfBornAfterNow () {
+    void shouldReturnExceptionIfDateOfBornAfterNow() {
         user.setBirthday(LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
             userController.addUser(user);
-        Assertions.assertTrue(userController.getUsers().isEmpty());
+        });
+        Assertions.assertEquals("Ошибка данных запроса", thrown.getMessage());
     }
 
     @Test
     void shouldCreateUser() {
-            userController.addUser(user);
-        Assertions.assertEquals(userController.getUsers().get(user.getIdU()),user);
+        userController.addUser(user);
+        Assertions.assertEquals(userController.getUsers().get(user.getIdU()), user);
     }
 
     @Test
@@ -92,55 +102,66 @@ public class TestValidation {
         userController.addUser(user);
         user.setLogin("Boo");
         userController.updateUser(user);
-        Assertions.assertEquals(userController.getUsers().get(user.getIdU()),user);
+        Assertions.assertEquals(userController.getUsers().get(user.getIdU()), user);
     }
 
     @Test
-    void shouldReturnExceptionIfFilmNameIsEmpty()  {
-        film.setName("");
+    void shouldReturnExceptionIfFilmNameIsEmpty() {
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
+            film.setName("");
             filmController.addFilm(film);
-        Assertions.assertTrue(filmController.getFilms().isEmpty());
+        });
+        Assertions.assertEquals("Ошибка данных запроса", thrown.getMessage());
     }
 
     @Test
     void shouldReturnExceptionIfDescriptionLenghtIs200() {
         film.setDescription(RandomString.make(200));
-            filmController.addFilm(film);
+        filmController.addFilm(film);
         Assertions.assertFalse(filmController.getFilms().isEmpty());
     }
 
     @Test
     void shouldReturnExceptionIfDescriptionLengthIs201() {
-        film.setDescription(RandomString.make(201));
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
+            film.setDescription(RandomString.make(201));
             filmController.addFilm(film);
-        Assertions.assertTrue(filmController.getFilms().isEmpty());
+        });
+        Assertions.assertEquals("Ошибка данных запроса", thrown.getMessage());
     }
 
     @Test
-    void shouldReturnExceptionIfDateIs28121895()  {
+    void shouldReturnExceptionIfDateIs28121895() {
         film.setReleaseDate("1895-12-28");
         filmController.addFilm(film);
         Assertions.assertFalse(filmController.getFilms().isEmpty());
     }
 
     @Test
-    void shouldReturnExceptionIfDateIsBefore27121895()  {
-        film.setReleaseDate("1895-12-27");
+    void shouldReturnExceptionIfDateIsBefore27121895() {
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
+            film.setReleaseDate("1895-12-27");
             filmController.addFilm(film);
-        Assertions.assertTrue(filmController.getFilms().isEmpty());
+        });
+
+        Assertions.assertEquals("Ошибка данных запроса", thrown.getMessage());
     }
 
     @Test
-    void shouldReturnExceptionIfDurationISZero()  {
-        film.setDuration(0);
-        filmController.addFilm(film);
-        Assertions.assertTrue(filmController.getFilms().isEmpty());
+    void shouldReturnExceptionIfDurationISZero() {
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
+            film.setDuration(0);
+            filmController.addFilm(film);
+        });
+        Assertions.assertEquals("Ошибка данных запроса", thrown.getMessage());
     }
 
     @Test
-    void shouldReturnExceptionIfDurationIsMinus1()  {
-        film.setDuration(-1);
+    void shouldReturnExceptionIfDurationIsMinus1() {
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
+            film.setDuration(-1);
             filmController.addFilm(film);
-        Assertions.assertTrue(filmController.getFilms().isEmpty());
+        });
+        Assertions.assertEquals("Ошибка данных запроса", thrown.getMessage());
     }
 }
