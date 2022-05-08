@@ -2,68 +2,78 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundIdException;
+import ru.yandex.practicum.filmorate.filmStorage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
 @Slf4j
 @Getter
-@RequestMapping(value = "/films")
+@RequestMapping
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final InMemoryFilmStorage inMemoryFilmStorage;
+    private final FilmService filmService;
 
-    @GetMapping
+    @Autowired
+    public FilmController(InMemoryFilmStorage inMemoryFilmStorage, FilmService filmService) {
+        this.inMemoryFilmStorage = inMemoryFilmStorage;
+        this.filmService = filmService;
+    }
+
+    @GetMapping("/films")
     public List<Film> allFilms() {
-        return new ArrayList<>(films.values());
+        return inMemoryFilmStorage.allFilms();
     }
 
-    @PostMapping
+    @PostMapping("/films")
     public Film addFilm(@RequestBody Film film) {
-        validateFilm(film);
-        film.setId(films.size() + 1);
-        films.put(film.getId(), film);
-        log.info("Фильм " + film.getName() + " добавлен");
-
-        return film;
+        return inMemoryFilmStorage.addFilm(film);
     }
 
-    @PutMapping
+    @PutMapping("/films")
     public Film updateFilm(@RequestBody Film film) {
-        validateFilm(film);
-        if (!films.containsKey(film.getId())) {
-            log.error("Фильм с ID " + film.getId() + " отсутствует");
-        }else {
-            films.put(film.getId(), film);
-            log.info("Фильм " + film.getName() + " обновлен");
-        }
-        return film;
+        return inMemoryFilmStorage.updateFilm(film);
     }
 
-    void validateFilm(Film film) {
-        if (film.getName().isEmpty()) {
-            log.error("Имя фильма не должно быть пустым");
-            throw new ValidationException("Ошибка данных запроса");
+    @GetMapping("/films/{id}")
+    public Film getUser(@PathVariable("id") Integer id) {
+        if (id <= 0) {
+            throw new NotFoundIdException(id + " не может быть отрицательным числом");
         }
+        return inMemoryFilmStorage.getFilms().get(id);
+    }
 
-        if (film.getDescription().length() > 200) {
-            log.error("Максимальная длина описания - 200 символов");
-            throw new ValidationException("Ошибка данных запроса");
+    @GetMapping("/films/popular")
+    public List<Film> rateFilms(
+            @RequestParam(value = "count", defaultValue = "10", required = false) Integer params
+    ) {
+        return filmService.rateOfFilms(params);
+    }
+
+    @DeleteMapping("films/{id}/like/{userId}")
+    public void removeLike(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
+        if (id <= 0) {
+            throw new NotFoundIdException(id + " не может быть отрицательным числом");
         }
-        LocalDate valiDate = LocalDate.of(1895, 12, 28);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate date = LocalDate.parse(film.getReleaseDate(), formatter);
-        if (date.isBefore(valiDate)) {
-            log.error("Дата релиза раньше 28 декабря 1985 года");
-            throw new ValidationException("Ошибка данных запроса");
+        if (userId <= 0) {
+            throw new NotFoundIdException(id + " не может быть отрицательным числом");
         }
-        if (film.getDuration() <= 0) {
-            log.error("Продолжительность фильма должна быть положительной");
-            throw new ValidationException("Ошибка данных запроса");
+        filmService.removeLike(id, userId);
+    }
+
+    @PutMapping("films/{id}/like/{userId}")
+    public void addLike(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
+        if (id <= 0) {
+            throw new NotFoundIdException(id + " не может быть отрицательным числом");
         }
+        if (userId <= 0) {
+            throw new NotFoundIdException(id + " не может быть отрицательным числом");
+        }
+        filmService.addLike(id, userId);
     }
 }

@@ -2,72 +2,100 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundIdException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.filmStorage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
 @Slf4j
 @Getter
-@RequestMapping(value = "/users")
+@RequestMapping
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
+    private final InMemoryUserStorage inMemoryUserStorage;
+    private final UserService userService;
 
-    @GetMapping
+    @Autowired
+    public UserController(InMemoryUserStorage inMemoryUserStorage, UserService userService) {
+        this.inMemoryUserStorage = inMemoryUserStorage;
+        this.userService = userService;
+    }
+
+    @GetMapping("/users")
     public List<User> allUsers() {
-        return new ArrayList<>(users.values());
+        return inMemoryUserStorage.allUsers();
     }
 
-    @PostMapping
+    @PostMapping("/users")
     public User addUser(@RequestBody User user) {
-        validateUser(user);
-            user.setIdU(users.size() + 1);
-            users.put(user.getIdU(), user);
-            log.info("Пользователь с именем " + user.getName() + " добавлен");
-        return user;
+        return inMemoryUserStorage.addUser(user);
     }
 
-    @PutMapping
+    @PutMapping("/users")
     public User updateUser(@RequestBody User user) {
-        validateUser(user);
-        if (!users.containsKey(user.getIdU())) {
-            log.error("Пользователь с ID " + user.getIdU() + " не найден");
-        } else {
-            users.put(user.getIdU(), user);
-            log.info("Пользователь с именем " + user.getName() + " добавлен");
-        }
-        return user;
+        return inMemoryUserStorage.updateUser(user);
     }
 
-
-    void validateUser(User user) {
-        if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
-            log.error("Электронная почта не может быть пустой и должна содержать символ @");
-            throw new ValidationException("Ошибка данных запроса");
+    @GetMapping("/users/{id}")
+    public User getUser(@PathVariable("id") Integer id) {
+        if (id <= 0) {
+            throw new NotFoundIdException(id + " не может быть отрицательным числом");
         }
-        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
-            log.error("Логин не может быть пустым или содержать пробелы");
-            throw new ValidationException("Ошибка данных запроса");
-        }
-        if (user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-
-        if (user.getBirthday().isEmpty()) {
-            log.error("Не указана дата рождения");
-            throw new ValidationException("Ошибка данных запроса");
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate date = LocalDate.parse(user.getBirthday(), formatter);
-        if (date.isAfter(LocalDate.now())) {
-            log.error("Дата рождения не может быть в будущем");
-            throw new ValidationException("Ошибка данных запроса");
-        }
+        return inMemoryUserStorage.getUsers().get(id);
     }
 
+    @GetMapping("/users/{id}/friends")
+    public Set<User> getFriendsByUser(@PathVariable("id") Integer id) {
+        if (!inMemoryUserStorage.getUsers().containsKey(id)) {
+            throw new NotFoundIdException("Некорректные данные: " + id);
+        }
+        return inMemoryUserStorage.getUsers().get(id).getFriends();
+    }
+
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public List<User> getMutualFriends(@PathVariable("id") Integer id, @PathVariable("otherId") Integer otherId) {
+
+        if (!inMemoryUserStorage.getUsers().containsKey(id)) {
+            throw new NotFoundIdException("Некорректные данные: " + id);
+        }
+
+        if (!inMemoryUserStorage.getUsers().containsKey(otherId)) {
+            throw new NotFoundIdException("Некорректные данные: " + otherId);
+        }
+
+        return userService.listOfMutualFriends(id, otherId);
+    }
+
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public void addToFriends(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
+
+        if (!inMemoryUserStorage.getUsers().containsKey(id)) {
+            throw new NotFoundIdException("Некорректные данные: " + id);
+        }
+
+        if (!inMemoryUserStorage.getUsers().containsKey(friendId)) {
+            throw new NotFoundIdException("Некорректные данные: " + friendId);
+        }
+
+        userService.addToFriends(id, friendId);
+    }
+
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
+
+        if (!inMemoryUserStorage.getUsers().containsKey(id)) {
+            throw new ValidationException("Некорректные данные: " + id);
+        }
+
+        if (!inMemoryUserStorage.getUsers().containsKey(friendId)) {
+            throw new ValidationException("Некорректные данные: " + friendId);
+        }
+
+        userService.removeFromFriends(id, friendId);
+    }
 }
