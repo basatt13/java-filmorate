@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundIdException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.ValidationUserException;
 import ru.yandex.practicum.filmorate.filmStorage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.filmStorage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -25,7 +26,7 @@ public class FilmService {
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
 
-    public Integer addLike(Integer idFilm, Integer idUser) {
+    public Integer addLike(Long idFilm, Long idUser) {
         if (!inMemoryFilmStorage.getFilms().containsKey(idFilm)) {
             throw new NotFoundIdException("Некорректные данные:" + idFilm);
         }
@@ -46,7 +47,7 @@ public class FilmService {
         return list.size();
     }
 
-    public Integer removeLike(Integer idFilm, Integer idUser) {
+    public Integer removeLike(Long idFilm, Long idUser) {
         if (!inMemoryFilmStorage.getFilms().containsKey(idFilm)) {
             throw new NotFoundIdException("Некорректные данные:" + idFilm);
         }
@@ -69,7 +70,7 @@ public class FilmService {
 
     public List<Film> rateOfFilms(Integer count) {
         if (count <= 0) {
-            throw new ValidationException("Показатель: " + count + " должен быть положительным");
+            throw new ValidationUserException("Показатель: " + count + " должен быть положительным");
         }
         final Set<User>[] list = new Set[]{new HashSet<>()};
         Comparator<Film> comparator = Comparator.comparing(obj -> {

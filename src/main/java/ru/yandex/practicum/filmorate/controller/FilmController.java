@@ -41,7 +41,7 @@ public class FilmController {
     }
 
     @GetMapping("/films/{id}")
-    public Film getUser(@PathVariable("id") Integer id) {
+    public Film getUser(@PathVariable("id") Long id) {
         if (id <= 0) {
             throw new NotFoundIdException(id + " не может быть отрицательным числом");
         }
@@ -56,7 +56,7 @@ public class FilmController {
     }
 
     @DeleteMapping("films/{id}/like/{userId}")
-    public void removeLike(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
+    public void removeLike(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         if (id <= 0) {
             throw new NotFoundIdException(id + " не может быть отрицательным числом");
         }
@@ -67,7 +67,7 @@ public class FilmController {
     }
 
     @PutMapping("films/{id}/like/{userId}")
-    public void addLike(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
+    public void addLike(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         if (id <= 0) {
             throw new NotFoundIdException(id + " не может быть отрицательным числом");
         }

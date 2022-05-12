@@ -16,9 +16,9 @@ public class UserService {
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
 
-    public void addToFriends(Integer idUser1, Integer idUser2) {
-        User user1 = getUserById(idUser1, inMemoryUserStorage);
-        User user2 = getUserById(idUser2, inMemoryUserStorage);
+    public void addToFriends(Long idUser1, Long idUser2) {
+        User user1 = getUserById(idUser1);
+        User user2 = getUserById(idUser2);
         Set<User> list1;
         Set<User> list2;
         if (user1.getFriends() == null) {
@@ -36,16 +36,16 @@ public class UserService {
         user2.setFriends(list2);
     }
 
-    public void removeFromFriends(Integer idUser1, Integer idUser2) {
-        User user1 = getUserById(idUser1, inMemoryUserStorage);
-        User user2 = getUserById(idUser2, inMemoryUserStorage);
+    public void removeFromFriends(Long idUser1, Long idUser2) {
+        User user1 = getUserById(idUser1);
+        User user2 = getUserById(idUser2);
         user1.getFriends().remove(user2);
         user2.getFriends().remove(user1);
     }
 
-    public List<User> listOfMutualFriends(Integer idUser1, Integer idUser2) {
-        User user1 = getUserById(idUser1, inMemoryUserStorage);
-        User user2 = getUserById(idUser2, inMemoryUserStorage);
+    public List<User> listOfMutualFriends(Long idUser1, Long idUser2) {
+        User user1 = getUserById(idUser1);
+        User user2 = getUserById(idUser2);
         Map<User, Integer> allFriends = new HashMap<>();
         List<User> friends = new ArrayList<>();
         friends.addAll(user1.getFriends());
@@ -60,7 +60,7 @@ public class UserService {
         return listOfFriends;
     }
 
-    public static User getUserById(Integer id, InMemoryUserStorage inMemoryUserStorage) {
+    public User getUserById(Long id) {
         if (!inMemoryUserStorage.getUsers().containsKey(id)) {
             throw new NotFoundIdException("Некорректные данные" + id);
         }

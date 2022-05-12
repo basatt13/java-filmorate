@@ -11,12 +11,18 @@ public class ErrorHadler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handlerIfIdNotFound(NotFoundIdException e) {
-        return new ErrorResponse(e.getParametr());
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handlerIfException(ValidationException ex) {
         return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handlerIfMistakesUserData(ValidationUserException e){
+        return new ErrorResponse(e.getMessage());
     }
 }

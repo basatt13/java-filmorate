@@ -14,7 +14,7 @@ public class User {
     private String name;
 
     @Builder.Default
-    private int id = 0;
+    private long id = 0;
     @Builder.Default
     private Set<User> friends = new HashSet<>();
 

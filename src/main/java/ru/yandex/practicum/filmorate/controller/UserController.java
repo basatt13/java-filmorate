@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public User getUser(@PathVariable("id") Integer id) {
+    public User getUser(@PathVariable("id") Long id) {
         if (id <= 0) {
             throw new NotFoundIdException(id + " не может быть отрицательным числом");
         }
@@ -50,7 +50,7 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}/friends")
-    public Set<User> getFriendsByUser(@PathVariable("id") Integer id) {
+    public Set<User> getFriendsByUser(@PathVariable("id") Long id) {
         if (!inMemoryUserStorage.getUsers().containsKey(id)) {
             throw new NotFoundIdException("Некорректные данные: " + id);
         }
@@ -58,7 +58,7 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}/friends/common/{otherId}")
-    public List<User> getMutualFriends(@PathVariable("id") Integer id, @PathVariable("otherId") Integer otherId) {
+    public List<User> getMutualFriends(@PathVariable("id") Long id, @PathVariable("otherId") Long otherId) {
 
         if (!inMemoryUserStorage.getUsers().containsKey(id)) {
             throw new NotFoundIdException("Некорректные данные: " + id);
@@ -72,7 +72,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")
-    public void addToFriends(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
+    public void addToFriends(@PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
 
         if (!inMemoryUserStorage.getUsers().containsKey(id)) {
             throw new NotFoundIdException("Некорректные данные: " + id);
@@ -86,14 +86,14 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}/friends/{friendId}")
-    public void removeFriend(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
+    public void removeFriend(@PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
 
         if (!inMemoryUserStorage.getUsers().containsKey(id)) {
-            throw new ValidationException("Некорректные данные: " + id);
+            throw new NotFoundIdException("Некорректные данные: " + friendId);
         }
 
         if (!inMemoryUserStorage.getUsers().containsKey(friendId)) {
-            throw new ValidationException("Некорректные данные: " + friendId);
+            throw new NotFoundIdException("Некорректные данные: " + friendId);
         }
 
         userService.removeFromFriends(id, friendId);

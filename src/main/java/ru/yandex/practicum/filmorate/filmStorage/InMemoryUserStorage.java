@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.filmStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.ValidationUserException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -16,9 +17,9 @@ import java.util.Map;
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
-    private final Map<Integer, User> users = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
 
-    public Map<Integer, User> getUsers() {
+    public Map<Long, User> getUsers() {
         return users;
     }
 
@@ -51,11 +52,11 @@ public class InMemoryUserStorage implements UserStorage {
     void validateUser(User user) {
         if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
             log.error("Электронная почта не может быть пустой и должна содержать символ @");
-            throw new ValidationException("Ошибка данных запроса");
+            throw new ValidationUserException("Ошибка данных запроса");
         }
         if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
             log.error("Логин не может быть пустым или содержать пробелы");
-            throw new ValidationException("Ошибка данных запроса");
+            throw new ValidationUserException("Ошибка данных запроса");
         }
         if (user.getName().isEmpty()) {
             user.setName(user.getLogin());
@@ -63,13 +64,13 @@ public class InMemoryUserStorage implements UserStorage {
 
         if (user.getBirthday().isEmpty()) {
             log.error("Не указана дата рождения");
-            throw new ValidationException("Ошибка данных запроса");
+            throw new ValidationUserException("Ошибка данных запроса");
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate date = LocalDate.parse(user.getBirthday(), formatter);
         if (date.isAfter(LocalDate.now())) {
             log.error("Дата рождения не может быть в будущем");
-            throw new ValidationException("Ошибка данных запроса");
+            throw new ValidationUserException("Ошибка данных запроса");
         }
     }
 
